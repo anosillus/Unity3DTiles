@@ -162,7 +162,7 @@ namespace Unity3DTiles.Schema
         public BoundingVolume ViewerRequestVolume = new BoundingVolume();
     
         /// <summary>The error, in meters, introduced if this tile is rendered and its children are not. At runtime, the geometric error is used to compute screen space error (SSE), i.e., the error measured in pixels.</summary>
-        [Newtonsoft.Json.JsonProperty("geometricError", Required = Newtonsoft.Json.Required.Always)]
+        [Newtonsoft.Json.JsonProperty("geometricError", Required = Newtonsoft.Json.Required.Default)]
         public double GeometricError { get; set; }
     
         /// <summary>Specifies if additive or replacement refinement is used when traversing the tileset for rendering.  This property is required for the root tile of a tileset; it is optional for all other tiles.  The default is to inherit from the parent tile.</summary>

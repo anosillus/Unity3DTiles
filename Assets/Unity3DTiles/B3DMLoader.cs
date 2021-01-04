@@ -52,6 +52,7 @@ public class B3DMLoader : ILoader
             // Using statment will ensure this.loader.LoadedStream is disposed
             using (BinaryReader br = new BinaryReader(this.loader.LoadedStream))
             {
+                uint skipReadSize = 4*7; //fixed size of header
                 // Remove query parameters if there are any
                 string filename = relativeFilePath.Split('?')[0];
                 // If this isn't a b3dm file (i.e. gltf or glb) this should just copy the underlying stream
@@ -69,35 +70,26 @@ public class B3DMLoader : ILoader
                     }
                     // Total length
                     br.ReadUInt32();
+                    
+                    // Feature Table Length
                     UInt32 featureTableLength = br.ReadUInt32();
                     if (featureTableLength == 0)
                     {
                         Debug.LogError("Unexpected zero length feature table in b3dm file: " + relativeFilePath);
                     }
                     UInt32 featureBinaryLength = br.ReadUInt32();
-                    if (featureBinaryLength != 0)
-                    {
-                        Debug.LogError("Unexpected non-zero length feature binary in b3dm file: " + relativeFilePath);
-                    }
+                    
                     // Batch table length
-                    br.ReadUInt32();
-                    if (featureBinaryLength != 0)
-                    {
-                        Debug.LogError("Unexpected non-zero length batch table in b3dm file: " + relativeFilePath);
-                    }
+                    UInt32 batchTableLength = br.ReadUInt32();
                     UInt32 batchBinaryLength = br.ReadUInt32();
-                    if (batchBinaryLength != 0)
-                    {
-                        Debug.LogError("Unexpected non-zero length batch binary in b3dm file: " + relativeFilePath);
-                    }
+
                     string featureTableJson = new String(br.ReadChars((int)featureTableLength));
                     FeatureTable ft = JsonConvert.DeserializeObject<FeatureTable>(featureTableJson);
-                    if (ft.BATCH_LENGTH != 0)
-                    {
-                        Debug.LogError("Unexpected non-zero length feature table BATCH_LENGTH in b3dm file: " + relativeFilePath);
-                    }
+
+                    skipReadSize += featureTableLength + featureBinaryLength + batchTableLength + batchBinaryLength;
                 }
-                LoadedStream = new MemoryStream((int)(loader.LoadedStream.Length - loader.LoadedStream.Position));
+                LoadedStream = new MemoryStream((int)(loader.LoadedStream.Length - skipReadSize));
+                loader.LoadedStream.Seek(skipReadSize,SeekOrigin.Begin);
                 CopyStream(loader.LoadedStream, LoadedStream);
             }
         }
