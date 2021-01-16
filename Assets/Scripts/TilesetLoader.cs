@@ -44,6 +44,9 @@ public class TilesetLoader : MonoBehaviour
         GameObject obj = new GameObject(url);
         if(root){
             obj.transform.localPosition = new Vector3((float)x,(float)z,(float)y);
+        (double b, double l, double h) = CoordConv.XYZ2BLH(bx,by,bz);
+        Quaternion q = Quaternion.Euler((float)(-b),0f,0f) * Quaternion.Euler(0.0f,(float)-l,0.0f);
+        obj.transform.localRotation = q;
         } else {
             obj.transform.localPosition = new Vector3((float)(bx - x),(float)(bz - z),(float)(by - y));
         }
